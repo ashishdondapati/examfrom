@@ -1,0 +1,267 @@
+pip install django
+python -m django --version
+
+django-admin
+
+
+django-admin startproject newproject
+
+
+tree command 
+
+python manage.py  startapp blog
+
+
+views.py in app
+-------------------
+
+from django.shortcuts import render
+
+from django.http import HttpResponse 
+
+def home(request):
+ return HttpResponse ('<h1>blog home </h1>')
+
+
+urls .py in app
+-----------------------
+
+from django.urls iport path
+from . import views 
+urlpatterns =[
+     path(''.views.home,name='blog-home'),
+]
+
+urls.py in project 
+---------------------
+from django.urls import include 
+
+urlpatterns=[
+           path('blog/',include('blog.urls')),]
+
+if we pass blog/  then blog/ is removed and sent to blog.urls 
+
+
+==============================================
+add new func in views 
+
+def about(request):
+    return HttpResponse('<h1>Blog about</h1>')
+-------
+urls.py in blog 
+
+path('about/',views.about,name='blog-about'),
+=================================================
+html templates...
+
+create templates directory in blog app
+create another directory with app names in templates directory 
+
+go to apps.py in app directory 
+Blogconfig class is in the file 
+
+inside project open settings.py
+installed app =
+'blog.apps.BlogConfig'
+
+
+in views.py 
+from django.shortcuts imort render 
+
+return render(request,'blog/home.html',)
+
+
+-------===============
+dynamic data 
+
+view.py
+
+posts=[{'author':'ashish'},{'author':'ashish2'}]
+
+
+if def home():
+  context={ 'posts':posts}
+ return render(reuest,'blog/home.html',context)
+
+
+to write a for loop
+
+{% for post in posts %}
+<h1>{{post.title}}</h1>
+<p> by{{post.author}}</p>
+{%endfor %}
+
+
+
+most of code is repeated ....so create a base.html code as base template with the repeated code 
+
+{% block contnet%}
+
+{%end block %}
+
+----------------------
+now in other codes use extends 
+
+{% extends "blog/base.html" %}
+
+{% block conten %}
+
+
+new code which is diff
+{%endblock %}
+
+
+
+=============================
+bootstrap https://getbootstrap.com/docs/4.0/getting-started/introduction/#starter-template
+
+
+
+
+
+now we can use bootstrap classes 
+
+<div class="container">
+  {% block content %} {%endblock %}
+</div>
+
+this will give nice padding to the content and also space 
+
+
+https://github.com/CoreyMSchafer/code_snippets/tree/master/Django_Blog/snippets
+
+
+
+create new folder static in the app directory 
+
+create blog under it ...
+paste main.css file in it....
+
+to put that main.css from static 
+
+write the code in base.html
+{%load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}">
+
+
+
+we can use urls in the href of the code in html files using href="{% url 'blog-home' %}"
+
+
+
+
+==============================
+python manage.py createsuperuser 
+
+database migration....
+
+python manage.py makemigrations 
+
+detects changes 
+
+python manage.py migrate 
+
+now auth user table will exist 
+
+===========================
+
+orm- object relational model
+
+sqlite or postgres
+
+models.py file inside blog appp
+--------------------------------each class is a table and each variable is an attribute 
+
+from django.db import models 
+from django.utils import timezone
+from django.contrib.auth.models import User 
+class post(models.Model): 
+    title=model.CharField(max_length=100)  
+     contnet=models.TextField(default=timezone.now)
+     date_posted=models.DateTimefield(default)
+     author=models.Foreignkey(user,on_delete=models.CASCADE)
+
+
+we have to run the make migrations to make changes in db 
+
+
+to see the sqlcode run 
+python manage.py sqlmigrate appname migrationversion
+
+-===================
+python manage.py shell
+
+from blog.models import post 
+from django.contrib.auth.models import User 
+User.objects.all()
+User.objects.first()
+User.objects.filter(username='coreyMS')
+user=User.objects.filter(username='coreyMS').first()
+
+
+we can get user attriblutes now 
+user.id 
+user.pk   pk is primary key
+
+
+
+create  a post object post1
+post1=post(title="blog1",content="sfdsffdfs",author=user)
+post1.save()
+post.objects.all()
+
+
+
+in models.py file -==================================
+
+create a func 
+
+def __str__(self):
+  return self.title
+
+
+now python manage.py shell
+from blog.models import post
+from django.contrib.auth.models import user 
+post.objects.all()
+
+post2=post(title="blog1",content="sfdsffdfs",author_id=user.id)
+
+
+to get all posts created by user=
+user.post_set.all()
+
+
+
+
+
+
+
+
+============================================================
+now in views you can use the original data from the posts you created in models not the posts dictionary
+
+views.py file 
+------------
+
+from .models import post 
+
+in the def home() 
+   context={'posts': post.objects.all()}
+
+
+
+
+in the admin.py file---------------------
+
+from django.contrib import admin
+
+from .models import Post
+admin.sitr.register(Post)
+
+==================================
+create users app
+add in the settings.py file 
+
+users.app.UserConfig
+
